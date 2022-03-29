@@ -1,0 +1,96 @@
+substitutions:
+  display_name: counterlight
+
+esphome:
+  name: ${display_name}
+  platform: ESP8266
+  board: esp01_1m
+  
+packages:
+  wifi: !include common/wifi.yaml
+
+
+logger:
+  level: VERBOSE
+
+api:
+
+ota:
+  safe_mode: True
+  
+  
+###############################
+# Sonoff Basic peripherals
+
+# Virtual switch GPI12  
+switch:
+  - platform: gpio
+    name: ${display_name}
+    pin:
+      number: 12
+      mode: output
+    id: ${display_name}_relay
+
+#Conflicts with status_led  
+#  - platform: gpio
+#    name: ${display_name} led"
+#    pin:
+#      number: 13
+#      mode: output
+#    id: ${display_name}_led
+    
+    
+# Physical Button on GPIO0
+binary_sensor:
+  - platform: gpio
+    pin: 
+      number: 0
+      inverted: False
+      mode: INPUT_PULLUP
+    name: ${display_name} button
+    internal: true
+    on_press:
+      - switch.toggle: ${display_name}_relay    
+      
+  # Physical Button on GPIO14
+  # AT42QT101X_Capacitive_Touch_Breakout,  OUT is HIGH on touch, LOW otherwise.
+  - platform: gpio
+    pin: 
+      number: 14
+      inverted: True
+      mode: INPUT_PULLUP
+    name: ${display_name} Remote Button"
+    on_press:
+      then:
+      - switch.toggle: ${display_name}_relay
+      - delay: 2s
+
+#    on_release:
+#      then:
+#      - switch.toggle: ${display_name}_relay
+
+      
+# Get the WiFi details
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: ${display_name} IP Address
+      id: ${display_name}_ip
+    ssid:
+      name: ${display_name} SSID
+    mac_address:
+      name: ${display_name} Mac Address
+      
+sensor:
+  - platform: wifi_signal
+    name: ${display_name} WiFi Signal Sensor"
+    id: ${display_name}_WiFi_level
+    update_interval: 60s
+    
+    
+status_led:
+  pin:
+    number: 13
+
+    
+ 
